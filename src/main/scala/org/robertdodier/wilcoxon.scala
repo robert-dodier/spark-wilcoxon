@@ -34,4 +34,19 @@ object wilcoxon
     val m = CXXX.first ().features.size
     0 to m - 1 map (i => U (CXXX.map (p => p.features(i)), C))
   }
+
+  def main (args: Array[String]): Unit = {
+    import org.apache.spark.{SparkConf, SparkContext}
+    val conf = new SparkConf ().setAppName ("wilcoxon")
+    val sc = new SparkContext (conf)
+
+    val X = sc.parallelize (Array (3.4, -9.3, 4.2, 17.2, 11.1, -2.7, 4.8, 9.6, -0.5, 8.2))
+    val C = sc.parallelize (Array (1, 0, 1, 1, 1, 0, 0, 0, 1, 1))
+
+    import java.lang.System
+    val myU = U (X, C)
+    System.out.println ("data: " + X.collect ())
+    System.out.println ("class labels: " + C.collect ())
+    System.out.println ("U/(n1*n0): " + myU)
+  }
 }
