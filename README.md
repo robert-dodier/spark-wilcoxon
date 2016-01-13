@@ -1,6 +1,6 @@
 ### Definition
 
-This package computes the Wilcoxon-Mann-Whitney rank sum statistic
+spark-wilcoxon computes the Wilcoxon-Mann-Whitney rank sum statistic
 (also known by other permutations of names) for data `X` which fall
 into two classes, here denoted class 1 and class 0. The statistic
 is defined as
@@ -25,7 +25,7 @@ value 1/2.
 
 ### Implementation
 
-This package defines an object `wilcoxon` which has three methods, all
+spark-wilcoxon defines an object `wilcoxon` which has three methods, all
 of which compute `U/(n1*n0)`.
 
 - `wilcoxon.U(RDD[Double], RDD[Int])`: the first argument is an
