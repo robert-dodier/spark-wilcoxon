@@ -25,12 +25,9 @@ value 1/2.
 
 ### Implementation
 
-spark-wilcoxon defines an object `wilcoxon` which has three methods, all
+spark-wilcoxon defines an object `wilcoxon` which has two methods, both
 of which compute `U/(n1*n0)`.
 
-- `wilcoxon.U(RDD[Double], RDD[Int])`: the first argument is an
-RDD of the data (denoted `X` above) and the second is an RDD of class
-labels (1 or 0).
 - `wilcoxon.U(RDD[(Double, Int)])`: the sole argument is an RDD
 comprising pairs of data and class labels.
 - `wilcoxon.allU(RDD[LabeledPoint])`: the sole argument is an RDD of
@@ -48,3 +45,51 @@ binary classification problem. Scaled values near 1 or 0 indicated
 greater relevance (with 1 indicating positive correlation and 0
 indicating negative correlation), and 1/2 indicating irrelevance.
 
+### Building spark-wilcoxon
+
+spark-wilcoxon uses SBT.
+
+- `sbt compile` to compile the Wilcoxon code
+- `sbt test` to compile and execute tests
+- `sbt assembly` to produce a jar
+
+### Running spark-wilcoxon
+
+Execute `sbt assembly` to produce a jar, which can be used by a stand-
+alone program, or by `spark-shell` or other interactive environment.
+
+Here is an example using `spark-shell`. The object `wilcoxon` contains
+a method `run_example` which constructs a two-class problem in which
+the classes are represented by Gaussian bumps which each have unit
+variance and means which differ by a multiple of 1/2. This example shows
+how the Wilcoxon statistic is 1/2 when the bumps are indistinguishable,
+and nearer to 1 or 0 as the bumps become more distinct.
+
+```
+$ spark-shell -classpath ./target/scala-2.10/spark-wilcoxon_2.10.6-0.0.1-SNAPSHOT-ASSEMBLY.jar
+Welcome to
+      ____              __
+     / __/__  ___ _____/ /__
+    _\ \/ _ \/ _ `/ __/  '_/
+   /___/ .__/\_,_/_/ /_/\_\   version 1.5.1
+      /_/
+
+Using Scala version 2.10.4 (Java HotSpot(TM) Server VM, Java 1.8.0_60)
+Type in expressions to have them evaluated.
+Type :help for more information.
+Spark context available as sc.
+SQL context available as sqlContext.
+
+scala> import org.robertdodier.wilcoxon
+import org.robertdodier.wilcoxon
+
+scala> wilcoxon.run_example (sc)
+difference of means = 0.0; U/(n1*n0) = 0.50723                                  
+difference of means = 0.5; U/(n1*n0) = 0.635793
+difference of means = 1.0; U/(n1*n0) = 0.762139                                 
+difference of means = -0.5; U/(n1*n0) = 0.366783
+difference of means = -1.0; U/(n1*n0) = 0.234772
+difference of means = -1.5; U/(n1*n0) = 0.142386
+
+scala>
+```
