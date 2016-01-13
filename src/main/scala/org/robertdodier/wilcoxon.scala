@@ -5,12 +5,6 @@ import org.apache.spark.rdd.RDD
 
 object wilcoxon
 {
-  def U (X: RDD[Double], C: RDD[Int]): Double =
-  {
-    val XC = X.zip (C)
-    U (XC)
-  }
-
   def U (XC: RDD[(Double, Int)]): Double =
   {
     val XC_sorted = XC.sortBy { case (a, b) => a }
