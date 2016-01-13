@@ -2,6 +2,7 @@ package org.robertdodier
 
 import org.apache.spark.mllib.regression.LabeledPoint
 import org.apache.spark.rdd.RDD
+import org.apache.spark.{SparkConf, SparkContext}
 
 object wilcoxon
 {
@@ -24,23 +25,37 @@ object wilcoxon
 
   def allU (CXXX : RDD[LabeledPoint]): Seq[Double] =
   {
-    val C = CXXX.map (p => p.label.toInt)
     val m = CXXX.first ().features.size
-    0 to m - 1 map (i => U (CXXX.map (p => p.features(i)), C))
+    0 to m - 1 map (i => U (CXXX.map (p => (p.features(i), p.label.toInt))))
   }
 
   def main (args: Array[String]): Unit = {
-    import org.apache.spark.{SparkConf, SparkContext}
     val conf = new SparkConf ().setAppName ("wilcoxon")
     val sc = new SparkContext (conf)
 
-    val X = sc.parallelize (Array (3.4, -9.3, 4.2, 17.2, 11.1, -2.7, 4.8, 9.6, -0.5, 8.2))
-    val C = sc.parallelize (Array (1, 0, 1, 1, 1, 0, 0, 0, 1, 1))
+    run_example (sc)
+  }
 
-    import java.lang.System
-    val myU = U (X, C)
-    System.out.println ("data: " + X.collect ())
-    System.out.println ("class labels: " + C.collect ())
-    System.out.println ("U/(n1*n0): " + myU)
+  def run_example (sc: SparkContext) = {
+    val rng = new java.util.Random (1L)
+    val data0 = for (i <- Range (0, 1000)) yield (rng.nextGaussian, 0)
+
+    for (i <- Range (0, 3)) {
+      val mean_diff = 0.5*i
+      val data1 = for (i <- Range (0, 1000)) yield (mean_diff + rng.nextGaussian, 1)
+      val data = sc.parallelize (data0 ++ data1)
+      val myU = U (data)
+
+      System.out.println (s"difference of means = $mean_diff; U/(n1*n0) = $myU")
+    }
+
+    for (i <- Range (0, 3)) {
+      val mean_diff = - 0.5*(i + 1)
+      val data1 = for (i <- Range (0, 1000)) yield (mean_diff + rng.nextGaussian, 1)
+      val data = sc.parallelize (data0 ++ data1)
+      val myU = U (data)
+
+      System.out.println (s"difference of means = $mean_diff; U/(n1*n0) = $myU")
+    }
   }
 }
